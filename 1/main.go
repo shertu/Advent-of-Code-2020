@@ -9,19 +9,9 @@ import (
 	"strconv"
 )
 
-func ReadInput(filename string) ([]int, error) {
-	f, err := os.Open(filename) // (*File, error)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return ReadSplitIntegers(f)
-}
-
-func ReadSplitIntegers(r io.Reader) ([]int, error) {
+func readInput(r io.Reader) ([]int, error) {
 	scanner := bufio.NewScanner(r)
-	scanner.Split(bufio.ScanWords)
+	scanner.Split(bufio.ScanLines)
 	var result []int
 	for scanner.Scan() {
 		x, err := strconv.Atoi(scanner.Text())
@@ -33,7 +23,7 @@ func ReadSplitIntegers(r io.Reader) ([]int, error) {
 	return result, scanner.Err()
 }
 
-func FindComponents(input []int, componentSumTarget int, componentToFindCount int) []int {
+func findComponents(input []int, componentSumTarget int, componentToFindCount int) []int {
 	if componentToFindCount < 0 {
 		panic("The number of components must be positive.")
 	}
@@ -61,7 +51,7 @@ func FindComponents(input []int, componentSumTarget int, componentToFindCount in
 			remainder := componentSumTarget - expense
 
 			// only ever need to search forward for values
-			for _, result := range FindComponents(input[i:], remainder, componentToFindCount-1) {
+			for _, result := range findComponents(input[i:], remainder, componentToFindCount-1) {
 				output = append(output, result)
 			}
 
@@ -75,15 +65,11 @@ func FindComponents(input []int, componentSumTarget int, componentToFindCount in
 }
 
 func main() {
-	var filename string = "input.txt"
-	input, err := ReadInput(filename)
-
-	if err != nil {
-		panic(err)
-	}
+	file, _ := os.Open("input.txt")
+	input, _ := readInput(file)
 
 	sort.Ints(input) // sorting inputs improves the average efficiency of the algorithm
-	var components = FindComponents(input, 2020, 3)
+	var components = findComponents(input, 2020, 3)
 
 	fmt.Println(components)
 }

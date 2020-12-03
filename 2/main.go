@@ -3,54 +3,44 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"log"
+	"io"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
 )
 
-type PasswordEntity struct {
+type Password struct {
 	min, max int
 	substr   string
 	str      string
 }
 
-func ReadInput(filename string) []PasswordEntity {
-	file, err := os.Open(filename)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer file.Close()
-
-	var entities []PasswordEntity = []PasswordEntity{}
-
-	scanner := bufio.NewScanner(file)
+func readInput(r io.Reader) ([]Password, error) {
+	scanner := bufio.NewScanner(r)
+	scanner.Split(bufio.ScanLines)
+	var result []Password
 	for scanner.Scan() {
-		text := scanner.Text()
-		entities = append(entities, ParsePasswordEntity(text))
+		x := strconvPassword(scanner.Text())
+		result = append(result, x)
 	}
-
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
-	}
-
-	return entities
+	return result, scanner.Err()
 }
 
-func ParsePasswordEntity(text string) PasswordEntity {
+func strconvPassword(s string) Password {
 	re := regexp.MustCompile(`^(\d+)-(\d+) (\w): (\w*)$`)
-	submatches := re.FindStringSubmatch(text)
+	submatches := re.FindStringSubmatch(s)
+
+	if len(submatches) == 0 {
+		panic(fmt.Sprintf("\"%v\" does not match the password regex.", s))
+	}
 
 	var minMatch, maxMatch, letterMatch, valueMatch string = submatches[1], submatches[2], submatches[3], submatches[4]
 
-	// min and max match
 	min, _ := strconv.Atoi(minMatch)
 	max, _ := strconv.Atoi(maxMatch)
 
-	return PasswordEntity{
+	return Password{
 		min:    min,
 		max:    max,
 		substr: letterMatch,
@@ -58,25 +48,25 @@ func ParsePasswordEntity(text string) PasswordEntity {
 	}
 }
 
-func ValidatePasswordEntityAlpha(en PasswordEntity) bool {
+func validatePasswordAlpha(en Password) bool {
 	substrCount := strings.Count(en.str, en.substr)
 	return substrCount >= en.min && substrCount <= en.max
 }
 
-func ValidatePasswordEntityBravo(en PasswordEntity) bool {
+func validatePasswordBravo(en Password) bool {
 	var a, b byte = en.str[en.min-1], en.str[en.max-1]
 	return (string(a) == en.substr) != (string(b) == en.substr) // xor between booleans is not equals
 }
 
 func main() {
-	var filename string = "input.txt"
-	entities := ReadInput(filename)
+	file, _ := os.Open("input.txt")
+	input, _ := readInput(file)
 
-	var validPasswordCount int = 0
-	for i := 0; i < len(entities); i++ {
-		if ValidatePasswordEntityBravo(entities[i]) {
-			validPasswordCount++
+	count := 0
+	for _, en := range input {
+		if validatePasswordBravo(en) {
+			count++
 		}
 	}
-	fmt.Println(validPasswordCount)
+	fmt.Println(count)
 }

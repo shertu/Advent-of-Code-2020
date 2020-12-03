@@ -25,19 +25,29 @@ func isTobogganEncounterTree(input []string, right int, down int) bool {
 	return rune == '#'
 }
 
+func countTreeEncounters(input []string, rightDelta int, downDelta int) int {
+	count := 0
+	rightPos := 0
+	for downPos := 0; downPos < len(input); downPos += downDelta {
+		if isTobogganEncounterTree(input, rightPos, downPos) {
+			count++
+		}
+		rightPos += rightDelta
+	}
+	return count
+}
+
 func main() {
 	file, _ := os.Open("input.txt")
 	input, _ := readInput(file)
 
-	fmt.Println(input)
-
-	count := 0
-	rightPos := 0
-	for downPos := 0; downPos < len(input); downPos += 3 {
-		if isTobogganEncounterTree(input, rightPos, downPos) {
-			count++
-		}
-		rightPos += 1
+	counts := []int{
+		countTreeEncounters(input, 1, 1),
+		countTreeEncounters(input, 3, 1),
+		countTreeEncounters(input, 5, 1),
+		countTreeEncounters(input, 7, 1),
+		countTreeEncounters(input, 1, 2),
 	}
-	fmt.Println(count)
+	
+	fmt.Println(counts)
 }

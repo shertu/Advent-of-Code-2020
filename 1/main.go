@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sort"
 	"strconv"
-  "sort"
 )
 
 func ReadInput(filename string) ([]int, error) {
@@ -38,40 +38,40 @@ func FindComponents(input []int, componentSumTarget int, componentToFindCount in
 		panic("The number of components must be positive.")
 	}
 
-  if componentToFindCount > len(input) {
-    return nil
-  }
+	if componentToFindCount > len(input) {
+		return nil
+	}
 
-  if componentToFindCount == 0 && componentSumTarget == 0 {
-    return []int { }
-  }
+	if componentToFindCount == 0 && componentSumTarget == 0 {
+		return []int{}
+	}
 
-  for i, expense := range input {
-    output := []int {expense}
+	for i, expense := range input {
+		output := []int{expense}
 
-    // simple case
-    if componentToFindCount == 1 {
-      if expense == componentSumTarget {
-        return output
-      }
-    }
+		// simple case
+		if componentToFindCount == 1 {
+			if expense == componentSumTarget {
+				return output
+			}
+		}
 
-    // complex case
-    if componentToFindCount > 1 {
-      remainder := componentSumTarget - expense
+		// complex case
+		if componentToFindCount > 1 {
+			remainder := componentSumTarget - expense
 
-      // only ever need to search forward for values
-      for _, result := range FindComponents(input[i:], remainder, componentToFindCount - 1) {
-        output = append(output, result)
-      }
+			// only ever need to search forward for values
+			for _, result := range FindComponents(input[i:], remainder, componentToFindCount-1) {
+				output = append(output, result)
+			}
 
-      if len(output) >= componentToFindCount {
-        return output
-      }
-    }
-  }
+			if len(output) >= componentToFindCount {
+				return output
+			}
+		}
+	}
 
-  return nil
+	return nil
 }
 
 func main() {
@@ -82,11 +82,8 @@ func main() {
 		panic(err)
 	}
 
-  // sort the input
-  sort.Ints(input)
+	sort.Ints(input) // sorting inputs improves the average efficiency of the algorithm
+	var components = FindComponents(input, 2020, 3)
 
-	// for each potential match
-	var alpha = FindComponents(input, 2020, 3)
-
-	fmt.Println(alpha)
+	fmt.Println(components)
 }

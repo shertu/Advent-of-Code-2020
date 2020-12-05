@@ -25,10 +25,11 @@ func IsTobogganEncounterTree(input []string, right int, down int) bool {
 
 func CountTreeEncounters(input []string, rightDelta int, downDelta int) int {
 	count := 0
-	for downPos, rightPos := 0, 0; downPos < len(input); downPos, rightPos = downPos+downDelta, rightPos+rightDelta {
-		if IsTobogganEncounterTree(input, rightPos, downPos) {
+	for downX, rightX := 0, 0; downX < len(input); downX += downDelta {
+		if IsTobogganEncounterTree(input, rightX, downX) {
 			count++
 		}
+		rightX += rightDelta // cleaner code by having on separate line
 	}
 	return count
 }

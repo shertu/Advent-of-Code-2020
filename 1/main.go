@@ -9,9 +9,10 @@ import (
 	"strconv"
 )
 
-func readInput(r io.Reader) ([]int, error) {
+func ReadInput(r io.Reader) ([]int, error) {
 	scanner := bufio.NewScanner(r)
-	scanner.Split(bufio.ScanLines)
+	scanner.Split(bufio.ScanWords)
+
 	var result []int
 	for scanner.Scan() {
 		x, err := strconv.Atoi(scanner.Text())
@@ -20,56 +21,84 @@ func readInput(r io.Reader) ([]int, error) {
 		}
 		result = append(result, x)
 	}
+
 	return result, scanner.Err()
 }
 
-func findComponents(input []int, componentSumTarget int, componentToFindCount int) []int {
-	if componentToFindCount < 0 {
-		panic("The number of components must be positive.")
+func MaxInt(x, y int) int {
+	if x > y {
+		return x
+	} else {
+		return y
 	}
+}
 
-	if componentToFindCount > len(input) {
-		return nil
-	}
+func ExtendedKnapsack(profit []int, weight []int, n int, maxW int, maxE int) [][][]int {
+	//fmt.Println(profit, weight, n, maxW, maxE)
+	var dx, dy, dz = n + 1, maxW + 1, maxE + 1
 
-	if componentToFindCount == 0 && componentSumTarget == 0 {
-		return []int{}
-	}
-
-	for i, expense := range input {
-		output := []int{expense}
-
-		// simple case
-		if componentToFindCount == 1 {
-			if expense == componentSumTarget {
-				return output
-			}
-		}
-
-		// complex case
-		if componentToFindCount > 1 {
-			remainder := componentSumTarget - expense
-
-			// only ever need to search forward for values
-			for _, result := range findComponents(input[i:], remainder, componentToFindCount-1) {
-				output = append(output, result)
-			}
-
-			if len(output) >= componentToFindCount {
-				return output
-			}
+	// Construct multi-dimensional slice.
+	var dp = make([][][]int, dx)
+	for i := range dp {
+		dp[i] = make([][]int, dy)
+		for j := range dp[i] {
+			dp[i][j] = make([]int, dz)
 		}
 	}
 
-	return nil
+	// For each element given,
+	for i := 1; i < dx; i++ {
+		// For each possible weight value,
+		for j := 1; j < dy; j++ {
+			// For each case where the total elements are less than the constraint,
+			for k := 1; k < dz; k++ {
+				// To ensure that we dont go out of the array,
+				if j >= weight[i-1] {
+					dp[i][j][k] = MaxInt(
+						dp[i-1][j][k],
+						dp[i-1][j-weight[i-1]][k-1]+profit[i-1],
+					)
+				} else {
+					dp[i][j][k] = dp[i-1][j][k]
+				}
+			}
+		}
+	}
+
+	return dp
+}
+
+func TraceExtendedKnapsack(dp [][][]int, profit []int, weight []int, n int, maxW int, maxE int) []int {
+	trace := make([]int, 0)
+
+	for i, j, k := n, maxW, maxE; i >= 0 && j >= 0 && k >= 0; i-- {
+		elem := dp[i][j][k]
+		//fmt.Println(i, j, k, elem)
+
+		if i > 0 {
+			elemPrev := dp[i-1][j][k]
+			if elem != elemPrev {
+				trace = append(trace, profit[i-1])
+				j -= weight[i-1]
+				k--
+			}
+		}
+	}
+
+	return trace
 }
 
 func main() {
-	file, _ := os.Open("input.txt")
-	input, _ := readInput(file)
+	file, _ := os.Open("1/input.txt")
+	input, _ := ReadInput(file)
 
-	sort.Ints(input) // sorting inputs improves the average efficiency of the algorithm
-	var components = findComponents(input, 2020, 3)
+	sort.Ints(input) // sorting causes items to be tried from smallest to largest
 
-	fmt.Println(components)
+	n := len(input)
+	maxW := 2020
+	maxE := 3
+
+	res := ExtendedKnapsack(input, input, n, maxW, maxE)
+	trace := TraceExtendedKnapsack(res, input, input, n, maxW, maxE)
+	fmt.Println(trace)
 }

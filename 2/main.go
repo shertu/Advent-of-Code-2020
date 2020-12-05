@@ -16,57 +16,64 @@ type Password struct {
 	str      string
 }
 
-func readInput(r io.Reader) ([]Password, error) {
+func ReadInput(r io.Reader) ([]Password, error) {
 	scanner := bufio.NewScanner(r)
 	scanner.Split(bufio.ScanLines)
 	var result []Password
 	for scanner.Scan() {
-		x := strconvPassword(scanner.Text())
-		result = append(result, x)
+		x, err := StringConvertPassword(scanner.Text())
+		if err != nil {
+			return result, err
+		}
+		result = append(result, *x)
 	}
 	return result, scanner.Err()
 }
 
-func strconvPassword(s string) Password {
+func StringConvertPassword(s string) (*Password, error) {
 	re := regexp.MustCompile(`^(\d+)-(\d+) (\w): (\w*)$`)
-	submatches := re.FindStringSubmatch(s)
+	matches := re.FindStringSubmatch(s)
 
-	if len(submatches) == 0 {
-		panic(fmt.Sprintf("\"%v\" does not match the password regex.", s))
+	if len(matches) == 0 {
+		return nil, fmt.Errorf("\"%v\" does not match the password regex", s)
 	}
 
-	var minMatch, maxMatch, letterMatch, valueMatch string = submatches[1], submatches[2], submatches[3], submatches[4]
+	min, _ := strconv.Atoi(matches[1])
+	max, _ := strconv.Atoi(matches[2])
 
-	min, _ := strconv.Atoi(minMatch)
-	max, _ := strconv.Atoi(maxMatch)
-
-	return Password{
+	result := Password{
 		min:    min,
 		max:    max,
-		substr: letterMatch,
-		str:    valueMatch,
+		substr: matches[3],
+		str:    matches[4],
 	}
+
+	return &result, nil
 }
 
-func validatePasswordAlpha(en Password) bool {
+func ValidatePasswordPartOne(en Password) bool {
 	substrCount := strings.Count(en.str, en.substr)
 	return substrCount >= en.min && substrCount <= en.max
 }
 
-func validatePasswordBravo(en Password) bool {
-	var a, b byte = en.str[en.min-1], en.str[en.max-1]
+func ValidatePasswordPartTwo(en Password) bool {
+	var a, b = en.str[en.min-1], en.str[en.max-1]
 	return (string(a) == en.substr) != (string(b) == en.substr) // xor between booleans is not equals
 }
 
 func main() {
-	file, _ := os.Open("input.txt")
-	input, _ := readInput(file)
+	file, _ := os.Open("2/input.txt")
+	input, _ := ReadInput(file)
 
-	count := 0
+	countA, countB := 0, 0
 	for _, en := range input {
-		if validatePasswordBravo(en) {
-			count++
+		if ValidatePasswordPartOne(en) {
+			countA++
+		}
+
+		if ValidatePasswordPartTwo(en) {
+			countB++
 		}
 	}
-	fmt.Println(count)
+	fmt.Println("part one", countA, "part two", countB)
 }

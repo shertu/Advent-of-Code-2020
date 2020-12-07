@@ -26,7 +26,6 @@ func Hash(a []rune, b []rune) []rune {
 		}
 	}
 
-	//fmt.Println(a, b, set)
 	return set
 }
 
@@ -60,10 +59,10 @@ func ProcessGroup(answers string) ([]rune, error) {
 	for scanner.Scan() {
 		runeCollection := []rune(scanner.Text())
 
-		if len(result) > 0 {
-			result = Hash(result, runeCollection)
-		} else {
+		if result == nil {
 			result = runeCollection
+		} else {
+			result = Hash(result, runeCollection)
 		}
 	}
 
@@ -77,7 +76,6 @@ func main() {
 	count := 0
 	for _, element := range input {
 		x, _ := ProcessGroup(element)
-		fmt.Println(element, len(x))
 		count += len(x)
 	}
 	fmt.Println(count)

@@ -19,15 +19,15 @@ type Password struct {
 func ReadInput(r io.Reader) ([]Password, error) {
 	scanner := bufio.NewScanner(r)
 	scanner.Split(bufio.ScanLines)
-	var result []Password
+	var passwords []Password
 	for scanner.Scan() {
-		x, err := StringConvertPassword(scanner.Text())
+		password, err := StringConvertPassword(scanner.Text())
 		if err != nil {
-			return result, err
+			return passwords, err
 		}
-		result = append(result, *x)
+		passwords = append(passwords, *password)
 	}
-	return result, scanner.Err()
+	return passwords, scanner.Err()
 }
 
 func StringConvertPassword(s string) (*Password, error) {
@@ -65,15 +65,15 @@ func main() {
 	file, _ := os.Open("2/input.txt")
 	input, _ := ReadInput(file)
 
-	countA, countB := 0, 0
-	for _, en := range input {
-		if ValidatePasswordPartOne(en) {
-			countA++
+	var countPartOne, countPartTwo int
+	for _, el := range input {
+		if ValidatePasswordPartOne(el) {
+			countPartOne++
 		}
 
-		if ValidatePasswordPartTwo(en) {
-			countB++
+		if ValidatePasswordPartTwo(el) {
+			countPartTwo++
 		}
 	}
-	fmt.Println("part one", countA, "part two", countB)
+	fmt.Println("part one", countPartOne, "part two", countPartTwo)
 }

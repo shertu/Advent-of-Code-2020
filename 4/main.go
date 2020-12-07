@@ -15,24 +15,23 @@ func ReadInput(r io.Reader) ([]string, error) {
 	scanner.Split(bufio.ScanLines)
 
 	var result []string
-	var passport string
+	var passportStr string
 
 	for scanner.Scan() {
-		// Check if there is an empty line to indicate a new passport.
 		if text := scanner.Text(); len(text) > 0 {
-			passport += " " + text
+			passportStr += " " + text
 		} else {
-			result = append(result, passport)
-			passport = ""
+			result = append(result, passportStr)
+			passportStr = ""
 		}
 	}
 
-	//result = append(result, passport) // append the last passport
+	result = append(result, passportStr)
 	return result, scanner.Err()
 }
 
-func ValidatePassport(passport string) (bool, error) {
-	r := strings.NewReader(passport)
+func ValidatePassport(passportStr string) (bool, error) {
+	r := strings.NewReader(passportStr)
 	scanner := bufio.NewScanner(r)
 	scanner.Split(bufio.ScanWords)
 
@@ -66,7 +65,6 @@ func ValidatePassport(passport string) (bool, error) {
 				hasCid = true
 			}
 
-			//fmt.Println(text, ok)
 			if ok {
 				okCount++
 			} else {
@@ -75,7 +73,6 @@ func ValidatePassport(passport string) (bool, error) {
 		}
 	}
 
-	//fmt.Println(passport, okCount)
 	if hasCid {
 		return okCount >= 8, scanner.Err()
 	} else {
@@ -116,8 +113,8 @@ func main() {
 	input, _ := ReadInput(file)
 
 	var count = 0
-	for _, element := range input {
-		if validation, _ := ValidatePassport(element); validation {
+	for _, el := range input {
+		if validation, _ := ValidatePassport(el); validation {
 			count++
 		}
 	}

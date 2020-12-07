@@ -34,7 +34,6 @@ func MaxInt(x, y int) int {
 }
 
 func ExtendedKnapsack(profit []int, weight []int, n int, maxW int, maxE int) [][][]int {
-	//fmt.Println(profit, weight, n, maxW, maxE)
 	var dx, dy, dz = n + 1, maxW + 1, maxE + 1
 
 	// Construct multi-dimensional slice.

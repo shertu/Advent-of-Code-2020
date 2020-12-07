@@ -44,9 +44,8 @@ func main() {
 	input, _ := ReadInput(file)
 
 	markedSeatCollection := make([]bool, 256*8)
-
-	for _, element := range input {
-		seatId := ConvertToSeatId(element)
+	for _, el := range input {
+		seatId := ConvertToSeatId(el)
 		markedSeatCollection[seatId] = true
 	}
 

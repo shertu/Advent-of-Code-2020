@@ -24,12 +24,12 @@ func IsTobogganEncounterTree(input []string, right int, down int) bool {
 }
 
 func CountTreeEncounters(input []string, rightDelta int, downDelta int) int {
-	count := 0
-	for downX, rightX := 0, 0; downX < len(input); downX += downDelta {
-		if IsTobogganEncounterTree(input, rightX, downX) {
+	var count int
+	for down, right := 0, 0; down < len(input); down += downDelta {
+		if IsTobogganEncounterTree(input, right, down) {
 			count++
 		}
-		rightX += rightDelta // cleaner code by having on separate line
+		right += rightDelta // cleaner code by having on separate line
 	}
 	return count
 }
